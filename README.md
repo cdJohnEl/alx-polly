@@ -1,4 +1,4 @@
-# ALX Polly
+# ALX Polly - Created with AI
 
 A modern, full-featured polling application built with Next.js, React, Tailwind CSS, and Supabase.
 
