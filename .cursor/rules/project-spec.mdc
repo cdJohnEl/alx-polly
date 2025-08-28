@@ -1,0 +1,222 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Cursor AI Rules - Polling App with QR Code Sharing
+
+## Project Overview
+You are an expert full-stack developer working on a **Polling App with QR Code Sharing** codebase. This application allows users to register, create polls, and share them via unique links and QR codes for others to vote on.
+
+Your primary goal is to provide practical, step-by-step AI-assisted development across the entire software development lifecycle while building a production-ready polling application.
+
+Adhere strictly to the rules, patterns, and conventions outlined in this document to ensure code quality, consistency, and maintainability.
+
+## Core Application Features
+The application includes:
+- **Poll Management**: Create, edit, delete polls with multiple options
+- **User Authentication**: Registration and login via Supabase Auth
+- **Voting System**: Public access via unique URLs with vote recording
+- **Sharing**: Auto-generated unique links and QR codes for each poll
+- **Results Display**: Visual representation of vote counts/percentages
+- **Dashboard**: User poll management interface
+
+## Technology Stack
+**DO NOT** introduce new libraries or frameworks without explicit instruction. Use only:
+
+- **Language**: TypeScript
+- **Framework**: Next.js 14+ (App Router only)
+- **Database & Auth**: Supabase
+- **Styling**: Tailwind CSS with shadcn/ui components
+- **QR Code Generation**: qrcode.react or similar approved library
+- **Deployment**: Vercel
+- **State Management**: Server Components for server state, useState/useReducer for client state
+
+## Architecture & File Structure
+
+### Directory Structure
+Follow Next.js App Router conventions:
+```
+/app
+  /auth
+  /dashboard
+  /poll/[id]
+  /create
+  layout.tsx
+  page.tsx
+/components
+  /ui (shadcn/ui components)
+  /forms
+  /dashboard
+  /poll
+/lib
+  /supabase
+  /actions
+  /utils
+/types
+```
+
+### Component Design Principles
+- **Server Components First**: Default to Server Components for data fetching and display
+- **Client Components**: Use `'use client'` only when interactivity is required (hooks, event handlers)
+- **Single Responsibility**: Each component should have one clear purpose
+- **Composition over Inheritance**: Build complex UIs from simple, reusable components
+
+## Code Patterns & Conventions
+
+### Naming Conventions
+- **Components**: PascalCase (`CreatePollForm.tsx`, `PollResults.tsx`)
+- **Files/Directories**: kebab-case (`create-poll`, `poll-results`)
+- **Functions/Variables**: camelCase (`submitVote`, `pollData`)
+- **Constants**: UPPER_SNAKE_CASE (`MAX_POLL_OPTIONS`)
+- **Types/Interfaces**: PascalCase (`Poll`, `VoteData`, `UserProfile`)
+
+### Data Fetching & Mutations
+**DO THIS:**
+```typescript
+// Server Component - fetch data directly
+async function PollsPage() {
+  const polls = await supabase.from('polls').select('*')
+  return <PollsList polls={polls} />
+}
+
+// Server Action for mutations
+async function createPoll(formData: FormData) {
+  'use server'
+  // Handle form submission
+}
+```
+
+**DON'T DO THIS:**
+```typescript
+// Don't use useEffect + useState in pages
+function PollsPage() {
+  const [polls, setPolls] = useState([])
+  useEffect(() => {
+    fetchPolls().then(setPolls)
+  }, [])
+}
+
+// Don't create API routes for simple mutations
+// /app/api/polls/route.ts - AVOID
+```
+
+### Form Handling
+- Use Server Actions for all form submissions
+- Implement proper validation and error handling
+- Use `useFormStatus` for loading states in Client Components
+- Follow progressive enhancement principles
+
+### Database Interactions
+- Use Supabase client for all database operations
+- Implement Row Level Security (RLS) policies
+- Use TypeScript types generated from Supabase schema
+- Handle authentication state properly
+
+## Security & Environment Variables
+
+### Environment Variables
+**Required variables in `.env.local`:**
+```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+SUPABASE_SECRET_KEY=your_supabase_anon_key
+```
+
+### Security Rules
+- **Never hardcode secrets** in source code
+- Use `process.env` for environment variables
+- Implement proper authentication checks
+- Use Supabase RLS for data security
+- Validate all user inputs server-side
+
+## User Roles & Access Control
+- **Poll Creator (Registered)**: Full CRUD operations on their polls
+- **Voter (Anonymous/Registered)**: Read access to polls, can vote
+- **Unauthenticated**: Can access public polls via links/QR codes
+
+## UI/UX Guidelines
+- Use shadcn/ui components consistently
+- Implement responsive design with Tailwind CSS
+- Follow accessibility best practices
+- Provide clear loading and error states
+- Use semantic HTML elements
+
+## Error Handling & Validation
+- Implement try/catch blocks in Server Actions
+- Use Next.js `error.tsx` files for route-level errors
+- Provide user-friendly error messages
+- Validate data both client and server-side
+- Handle edge cases (empty polls, duplicate votes, etc.)
+
+## Testing Strategy
+- Write unit tests for utility functions
+- Test Server Actions with proper mocking
+- Implement integration tests for critical user flows
+- Use AI tools to generate test cases and structures
+
+## Performance Optimization
+- Leverage Next.js App Router caching
+- Use Server Components to reduce client-side JavaScript
+- Implement proper image optimization
+- Use Supabase real-time features where appropriate
+
+## Deployment & DevOps
+- Deploy on Vercel with proper environment variables
+- Use Git with meaningful commit messages
+- Implement proper branch strategies
+- Document AI tool usage in commit messages
+
+## AI Tool Integration Guidelines
+Document usage of:
+- **Planning**: AI chat for data modeling and API design
+- **UI Generation**: Tools like v0.dev for component creation
+- **Code Assistance**: IDE AI tools for writing Next.js components
+- **Testing**: AI-generated test structures and cases
+- **Debugging**: AI-assisted error resolution and code explanation
+
+## Verification Checklist
+Before submitting code, verify:
+
+✅ **Architecture**
+- [ ] Uses Next.js App Router (not Pages Router)
+- [ ] Server Components for data fetching
+- [ ] Client Components only when necessary
+- [ ] Proper file structure and naming
+
+✅ **Data Layer**
+- [ ] Server Actions for mutations
+- [ ] Supabase client for database interactions
+- [ ] Environment variables for secrets
+- [ ] Proper TypeScript typing
+
+✅ **UI/UX**
+- [ ] shadcn/ui components used appropriately
+- [ ] Responsive design implemented
+- [ ] Loading and error states handled
+- [ ] Accessibility considerations
+
+✅ **Security**
+- [ ] No hardcoded secrets
+- [ ] Proper authentication checks
+- [ ] Input validation implemented
+- [ ] RLS policies considered
+
+✅ **Quality**
+- [ ] TypeScript strict mode compliance
+- [ ] Error handling implemented
+- [ ] Code follows project conventions
+- [ ] Performance considerations addressed
+
+## Common Patterns to Avoid
+- ❌ Using `useEffect` for data fetching in pages
+- ❌ Creating API routes for simple CRUD operations
+- ❌ Hardcoding configuration values
+- ❌ Ignoring TypeScript errors
+- ❌ Not handling loading/error states
+- ❌ Bypassing authentication checks
+- ❌ Not following component composition patterns
+
+
+
+
+---
