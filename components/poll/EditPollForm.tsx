@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Poll, PollSettings } from "@/lib/types";
 
 interface EditPollFormProps {
@@ -9,6 +9,8 @@ interface EditPollFormProps {
 }
 
 export default function EditPollForm({ poll, onSave, onCancel }: EditPollFormProps) {
+  const MAX_OPTIONS = 10;
+  const MIN_OPTIONS = 2;
   const [tab, setTab] = useState<"basic" | "settings">("basic");
   const [title, setTitle] = useState(poll.title);
   const [description, setDescription] = useState(poll.description || "");
@@ -24,29 +26,31 @@ export default function EditPollForm({ poll, onSave, onCancel }: EditPollFormPro
     setSettings(poll.settings);
   }, [poll]);
 
-  function handleAddOption() {
-    if (options.length < 10) setOptions([...options, ""]);
-  }
+  const handleAddOption = useCallback(() => {
+    setOptions(prev => (prev.length < MAX_OPTIONS ? [...prev, ""] : prev));
+  }, []);
 
-  function handleRemoveOption(idx: number) {
-    if (options.length > 2) setOptions(options.filter((_, i) => i !== idx));
-  }
+  const handleRemoveOption = useCallback((idx: number) => {
+    setOptions(prev => (prev.length > MIN_OPTIONS ? prev.filter((_, i) => i !== idx) : prev));
+  }, []);
 
-  function handleOptionChange(idx: number, value: string) {
-    setOptions(options.map((opt, i) => (i === idx ? value : opt)));
-  }
+  const handleOptionChange = useCallback((idx: number, value: string) => {
+    setOptions(prev => prev.map((opt, i) => (i === idx ? value : opt)));
+  }, []);
 
-  function handleTabSwitch(tab: "basic" | "settings") {
+  const handleTabSwitch = useCallback((tab: "basic" | "settings") => {
     setTab(tab);
-  }
+  }, []);
 
-  function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) {
+    const trimmedTitle = title.trim();
+    const validOptions = options.filter(Boolean);
+    if (!trimmedTitle) {
       setError("Poll title is required.");
       return;
     }
-    if (options.filter(Boolean).length < 2) {
+    if (validOptions.length < MIN_OPTIONS) {
       setError("At least 2 options are required.");
       return;
     }
@@ -54,15 +58,15 @@ export default function EditPollForm({ poll, onSave, onCancel }: EditPollFormPro
 
     const updatedPoll: Poll = {
       ...poll,
-      title: title.trim(),
+      title: trimmedTitle,
       description: description.trim() || undefined,
-      options: options.filter(Boolean),
+      options: validOptions,
       settings,
       updatedAt: new Date().toISOString(),
     };
 
     onSave(updatedPoll);
-  }
+  }, [title, description, options, settings, onSave, poll]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -155,7 +159,7 @@ export default function EditPollForm({ poll, onSave, onCancel }: EditPollFormPro
               id="multipleChoice"
               checked={settings.multipleChoice}
               onChange={(e) =>
-                setSettings({ ...settings, multipleChoice: e.target.checked })
+                setSettings(s => ({ ...s, multipleChoice: e.target.checked }))
               }
             />
             <label htmlFor="multipleChoice" className="font-medium">
@@ -168,7 +172,7 @@ export default function EditPollForm({ poll, onSave, onCancel }: EditPollFormPro
               id="requireLogin"
               checked={settings.requireLogin}
               onChange={(e) =>
-                setSettings({ ...settings, requireLogin: e.target.checked })
+                setSettings(s => ({ ...s, requireLogin: e.target.checked }))
               }
             />
             <label htmlFor="requireLogin" className="font-medium">
@@ -181,7 +185,7 @@ export default function EditPollForm({ poll, onSave, onCancel }: EditPollFormPro
               type="datetime-local"
               value={settings.endDate || ""}
               onChange={(e) =>
-                setSettings({ ...settings, endDate: e.target.value || undefined })
+                setSettings(s => ({ ...s, endDate: e.target.value || undefined }))
               }
               className="w-full border rounded px-3 py-2"
             />
