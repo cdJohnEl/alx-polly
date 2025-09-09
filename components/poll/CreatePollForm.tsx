@@ -1,7 +1,9 @@
 
 
 "use client";
-import React, { useState } from "react";
+
+import { useState } from "react";
+import PollOptionInput from "./PollOptionInput";
 
 interface PollSettings {
   multipleChoice: boolean;
@@ -36,8 +38,8 @@ export default function CreatePollForm({ onCreate }: CreatePollFormProps) {
   function handleRemoveOption(idx: number) {
     if (options.length > 2) setOptions(options.filter((_, i) => i !== idx));
   }
-  function handleOptionChange(idx: number, value: string) {
-    setOptions(options.map((opt, i) => (i === idx ? value : opt)));
+  function handleOptionsChange(newOptions: string[]) {
+    setOptions(newOptions);
   }
   function handleTabSwitch(tab: "basic" | "settings") {
     setTab(tab);
@@ -65,25 +67,19 @@ export default function CreatePollForm({ onCreate }: CreatePollFormProps) {
       {tab === "basic" && (
         <div className="space-y-4">
           <div>
-            <label className="block font-medium mb-1">Poll Title *</label>
-            <input type="text" value={title} onChange={e => setTitle(e.target.value)} className="w-full border rounded px-3 py-2" required />
+            <label className="block font-medium mb-1" htmlFor="poll-title">Poll Title *</label>
+            <input id="poll-title" type="text" value={title} onChange={e => setTitle(e.target.value)} className="w-full border rounded px-3 py-2" required />
           </div>
           <div>
-            <label className="block font-medium mb-1">Description</label>
-            <textarea value={description} onChange={e => setDescription(e.target.value)} className="w-full border rounded px-3 py-2" rows={2} />
+            <label className="block font-medium mb-1" htmlFor="poll-description">Description</label>
+            <textarea id="poll-description" value={description} onChange={e => setDescription(e.target.value)} className="w-full border rounded px-3 py-2" rows={2} />
           </div>
-          <div>
-            <label className="block font-medium mb-1">Options *</label>
-            {options.map((opt, idx) => (
-              <div key={idx} className="flex gap-2 mb-2">
-                <input type="text" value={opt} onChange={e => handleOptionChange(idx, e.target.value)} className="w-full border rounded px-3 py-2" required />
-                {options.length > 2 && (
-                  <button type="button" className="text-red-500 font-bold" onClick={() => handleRemoveOption(idx)}>-</button>
-                )}
-              </div>
-            ))}
-            <button type="button" className="mt-2 px-3 py-1 bg-gray-200 rounded" onClick={handleAddOption}>Add Option</button>
-          </div>
+          <PollOptionInput
+            options={options}
+            onChange={handleOptionsChange}
+            onAdd={handleAddOption}
+            onRemove={handleRemoveOption}
+          />
         </div>
       )}
       {tab === "settings" && (
@@ -101,8 +97,8 @@ export default function CreatePollForm({ onCreate }: CreatePollFormProps) {
             </label>
           </div>
           <div>
-            <label className="block font-medium mb-1">Poll End Date</label>
-            <input type="date" value={settings.endDate || ""} onChange={e => setSettings(s => ({ ...s, endDate: e.target.value }))} className="border rounded px-3 py-2" />
+            <label className="block font-medium mb-1" htmlFor="poll-end-date">Poll End Date</label>
+            <input id="poll-end-date" type="date" value={settings.endDate || ""} onChange={e => setSettings(s => ({ ...s, endDate: e.target.value }))} className="border rounded px-3 py-2" />
           </div>
         </div>
       )}
