@@ -1,4 +1,5 @@
 import React from "react";
+"use client";
 
 interface PollOptionInputProps {
   options: string[];
@@ -22,7 +23,7 @@ export default function PollOptionInput({ options, onChange, onAdd, onRemove }: 
               onChange(newOptions);
             }}
             className="w-full border rounded px-3 py-2"
-            required
+            required={idx < 2}
             aria-label={`Option ${idx + 1}`}
           />
           {options.length > 2 && (
@@ -34,3 +35,5 @@ export default function PollOptionInput({ options, onChange, onAdd, onRemove }: 
     </div>
   );
 }
+"use client";
+"use client";
